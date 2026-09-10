@@ -1,54 +1,55 @@
-import Database from 'better-sqlite3'
-import path from 'path'
-import fs from 'fs'
+import { createClient, type Client } from '@libsql/client'
 
-const DB_PATH = process.env.DB_PATH ?? path.join(process.cwd(), 'data', 'portfolio.db')
+let _client: Client | null = null
+let _initialized = false
 
-let db: Database.Database | null = null
-
-export function getDb(): Database.Database {
-  if (db) return db
-
-  const dir = path.dirname(DB_PATH)
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-
-  db = new Database(DB_PATH)
-  db.pragma('journal_mode = WAL')
-  db.pragma('foreign_keys = ON')
-
-  initSchema(db)
-  return db
+function getClient(): Client {
+  if (!_client) {
+    _client = createClient({
+      url: process.env.TURSO_DATABASE_URL ?? 'file:./data/portfolio.db',
+      authToken: process.env.TURSO_AUTH_TOKEN,
+    })
+  }
+  return _client
 }
 
-function initSchema(db: Database.Database) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS holdings (
-      id         INTEGER PRIMARY KEY AUTOINCREMENT,
-      ticker     TEXT NOT NULL UNIQUE,
-      shares     REAL NOT NULL,
-      avg_cost   REAL NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS transactions (
-      id         INTEGER PRIMARY KEY AUTOINCREMENT,
-      ticker     TEXT NOT NULL,
-      type       TEXT NOT NULL CHECK(type IN ('BUY','SELL')),
-      shares     REAL NOT NULL,
-      price      REAL NOT NULL,
-      date       TEXT NOT NULL,
-      notes      TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS watchlist (
-      id         INTEGER PRIMARY KEY AUTOINCREMENT,
-      ticker     TEXT NOT NULL UNIQUE,
-      group_name TEXT DEFAULT 'Default',
-      added_at   DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_transactions_ticker ON transactions(ticker);
-    CREATE INDEX IF NOT EXISTS idx_holdings_ticker ON holdings(ticker);
-  `)
+export async function getDb(): Promise<Client> {
+  const db = getClient()
+  if (!_initialized) {
+    await db.batch([
+      {
+        sql: `CREATE TABLE IF NOT EXISTS holdings (
+          id         INTEGER PRIMARY KEY AUTOINCREMENT,
+          ticker     TEXT NOT NULL UNIQUE,
+          shares     REAL NOT NULL,
+          avg_cost   REAL NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`,
+      },
+      {
+        sql: `CREATE TABLE IF NOT EXISTS transactions (
+          id         INTEGER PRIMARY KEY AUTOINCREMENT,
+          ticker     TEXT NOT NULL,
+          type       TEXT NOT NULL,
+          shares     REAL NOT NULL,
+          price      REAL NOT NULL,
+          date       TEXT NOT NULL,
+          notes      TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`,
+      },
+      {
+        sql: `CREATE TABLE IF NOT EXISTS watchlist (
+          id         INTEGER PRIMARY KEY AUTOINCREMENT,
+          ticker     TEXT NOT NULL UNIQUE,
+          group_name TEXT DEFAULT 'Default',
+          added_at   DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`,
+      },
+      { sql: 'CREATE INDEX IF NOT EXISTS idx_transactions_ticker ON transactions(ticker)' },
+      { sql: 'CREATE INDEX IF NOT EXISTS idx_holdings_ticker ON holdings(ticker)' },
+    ], 'write')
+    _initialized = true
+  }
+  return db
 }

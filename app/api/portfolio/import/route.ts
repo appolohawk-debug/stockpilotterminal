@@ -16,36 +16,33 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Failed to parse CSV' }, { status: 400 })
   }
 
-  const db = getDb()
-  const insertHolding = db.prepare(`
-    INSERT INTO holdings (ticker, shares, avg_cost)
-    VALUES (?, ?, ?)
-    ON CONFLICT(ticker) DO UPDATE SET shares = excluded.shares, avg_cost = excluded.avg_cost
-  `)
-  const insertTx = db.prepare(`
-    INSERT INTO transactions (ticker, type, shares, price, date, notes)
-    VALUES (?, 'BUY', ?, ?, date('now'), 'Imported from Zerodha')
-  `)
-
+  const db = await getDb()
   const imported: string[] = []
   const skipped: string[] = []
 
-  const importMany = db.transaction(() => {
-    for (const row of data) {
-      const symbol = row.Tradingsymbol?.trim()
-      const shares = Number(row.Quantity)
-      const avgCost = Number(row['Average price'])
+  const statements = []
+  for (const row of data) {
+    const symbol = row.Tradingsymbol?.trim()
+    const shares = Number(row.Quantity)
+    const avgCost = Number(row['Average price'])
 
-      if (!symbol || !shares || !avgCost) { skipped.push(symbol ?? 'unknown'); continue }
+    if (!symbol || !shares || !avgCost) { skipped.push(symbol ?? 'unknown'); continue }
 
-      const ticker = toNSETicker(symbol)
-      insertHolding.run(ticker, shares, avgCost)
-      insertTx.run(ticker, shares, avgCost)
-      imported.push(ticker)
-    }
-  })
+    const ticker = toNSETicker(symbol)
+    statements.push({
+      sql: `INSERT INTO holdings (ticker, shares, avg_cost)
+            VALUES (?, ?, ?)
+            ON CONFLICT(ticker) DO UPDATE SET shares = excluded.shares, avg_cost = excluded.avg_cost`,
+      args: [ticker, shares, avgCost] as [string, number, number],
+    })
+    statements.push({
+      sql: `INSERT INTO transactions (ticker, type, shares, price, date, notes) VALUES (?, 'BUY', ?, ?, date('now'), 'Imported from Zerodha')`,
+      args: [ticker, shares, avgCost] as [string, number, number],
+    })
+    imported.push(ticker)
+  }
 
-  importMany()
+  if (statements.length) await db.batch(statements, 'write')
 
   return NextResponse.json({ ok: true, imported: imported.length, skipped: skipped.length, tickers: imported })
 }
