@@ -1,8 +1,19 @@
 import yahooFinance from 'yahoo-finance2'
 import type { Quote, OHLCVCandle } from './types'
 
-// Suppress yahoo-finance2 validation notices
-yahooFinance.setGlobalConfig({ validation: { logErrors: false } })
+yahooFinance.setGlobalConfig({
+  validation: { logErrors: false },
+  cookieRefresh: {
+    enabled: true,
+    fetchOptions: {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+      }
+    }
+  }
+})
 
 export function toNSETicker(symbol: string): string {
   const s = symbol.toUpperCase().trim()
