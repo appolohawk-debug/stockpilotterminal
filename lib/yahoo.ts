@@ -109,12 +109,12 @@ export async function searchTickers(query: string) {
   const quotes = (result.quotes ?? []) as unknown as SearchQuote[]
   return quotes
     .filter((q) => q.quoteType === 'EQUITY' || q.quoteType === 'ETF')
-    .filter((q) => q.symbol?.endsWith('.NS') || q.symbol?.endsWith('.BO'))
+    .filter((q) => !!q.symbol)
     .map((q) => ({
-      ticker: q.symbol,
-      name: q.longname ?? q.shortname ?? q.symbol,
-      exchange: q.exchange,
-      type: q.quoteType,
+      ticker: toNSETicker(q.symbol!),
+      name: q.longname ?? q.shortname ?? q.symbol!,
+      exchange: q.exchange ?? '',
+      type: q.quoteType ?? '',
     }))
 }
 

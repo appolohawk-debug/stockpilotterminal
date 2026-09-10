@@ -13,8 +13,14 @@ interface SearchResult {
 export function SearchBar() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [debounced, setDebounced] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(query.trim()), 300)
+    return () => clearTimeout(t)
+  }, [query])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -30,9 +36,9 @@ export function SearchBar() {
   }, [])
 
   const { data: results = [], isFetching } = useQuery<SearchResult[]>({
-    queryKey: ['search', query],
-    queryFn: () => fetch(`/api/search?q=${encodeURIComponent(query)}`).then((r) => r.json()),
-    enabled: query.length >= 1,
+    queryKey: ['search', debounced],
+    queryFn: () => fetch(`/api/search?q=${encodeURIComponent(debounced)}`).then((r) => r.json()),
+    enabled: debounced.length >= 2,
     staleTime: 10_000,
   })
 
@@ -85,8 +91,8 @@ export function SearchBar() {
                   <span className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--surface-2)', color: 'var(--text-muted)' }}>{r.type}</span>
                 </button>
               ))}
-              {query.length >= 1 && !results.length && !isFetching && (
-                <p className="px-4 py-6 text-sm text-center" style={{ color: 'var(--text-muted)' }}>No results for "{query}"</p>
+              {debounced.length >= 2 && !results.length && !isFetching && (
+                <p className="px-4 py-6 text-sm text-center" style={{ color: 'var(--text-muted)' }}>No results for "{debounced}"</p>
               )}
             </div>
           </div>
