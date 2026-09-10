@@ -51,10 +51,10 @@ export function calcSMA(closes: number[], period: number): number {
 
 export function calcMACD(closes: number[]): {
   macd: number
-  signal: number
+  signalLine: number
   histogram: number
 } {
-  if (closes.length < 35) return { macd: 0, signal: 0, histogram: 0 }
+  if (closes.length < 35) return { macd: 0, signalLine: 0, histogram: 0 }
 
   const ema12 = calcEMA(closes, 12)
   const ema26 = calcEMA(closes, 26)
@@ -72,7 +72,7 @@ export function calcMACD(closes: number[]): {
 
   return {
     macd: lastMACD,
-    signal: lastSignal,
+    signalLine: lastSignal,
     histogram: lastMACD - lastSignal,
   }
 }

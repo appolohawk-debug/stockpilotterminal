@@ -85,7 +85,7 @@ export interface IndicatorResult {
 export interface TechnicalBreakdown {
   rsi: IndicatorResult & { value: number }
   sma: IndicatorResult & { sma50: number; sma200: number; priceAbove50: boolean; priceAbove200: boolean; goldenCross: boolean }
-  macd: IndicatorResult & { macd: number; signal: number; histogram: number }
+  macd: IndicatorResult & { macd: number; signalLine: number; histogram: number }
   volume: IndicatorResult & { current: number; avg20: number }
   adx: IndicatorResult & { value: number }
   bollinger: IndicatorResult & { upper: number; middle: number; lower: number; pctB: number }

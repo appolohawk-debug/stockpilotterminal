@@ -3,6 +3,7 @@ import { getDb } from '@/lib/db'
 import { toNSETicker } from '@/lib/yahoo'
 import Papa from 'papaparse'
 import type { ZerodhaHolding } from '@/lib/types'
+import type { InStatement } from '@libsql/client'
 
 export async function POST(req: Request) {
   const formData = await req.formData()
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
   const imported: string[] = []
   const skipped: string[] = []
 
-  const statements = []
+  const statements: InStatement[] = []
   for (const row of data) {
     const symbol = row.Tradingsymbol?.trim()
     const shares = Number(row.Quantity)
