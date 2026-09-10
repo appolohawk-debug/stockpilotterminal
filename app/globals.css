@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0f;
+  --surface: #111118;
+  --surface-2: #1a1a24;
+  --border: #2a2a3a;
+  --text: #e8e8f0;
+  --text-muted: #6b6b80;
+  --green: #00c87a;
+  --yellow: #f5c842;
+  --red: #f5424b;
+  --blue: #4b9eff;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text);
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+
+.surface { background-color: var(--surface); }
+.surface-2 { background-color: var(--surface-2); }
+.border-subtle { border-color: var(--border); }
+
+.signal-green { color: var(--green); }
+.signal-yellow { color: var(--yellow); }
+.signal-red { color: var(--red); }
+
+.badge-green { background-color: rgba(0, 200, 122, 0.15); color: var(--green); border: 1px solid rgba(0, 200, 122, 0.3); }
+.badge-yellow { background-color: rgba(245, 200, 66, 0.15); color: var(--yellow); border: 1px solid rgba(245, 200, 66, 0.3); }
+.badge-red { background-color: rgba(245, 66, 75, 0.15); color: var(--red); border: 1px solid rgba(245, 66, 75, 0.3); }
+
+.change-up { color: var(--green); }
+.change-down { color: var(--red); }
+
+/* TradingView chart container */
+.chart-container { background-color: var(--surface); border-radius: 8px; overflow: hidden; }
+
+/* Table styles */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.5rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+.data-table td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(42, 42, 58, 0.5); font-size: 0.875rem; }
+.data-table tr:hover td { background-color: var(--surface-2); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
