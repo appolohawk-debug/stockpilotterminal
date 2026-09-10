@@ -104,8 +104,10 @@ export async function getFundamentals(ticker: string) {
 }
 
 export async function searchTickers(query: string) {
+  type SearchQuote = { quoteType?: string; symbol?: string; longname?: string; shortname?: string; exchange?: string }
   const result = await yahooFinance.search(query, { newsCount: 0, quotesCount: 8 })
-  return (result.quotes ?? [])
+  const quotes = (result.quotes ?? []) as unknown as SearchQuote[]
+  return quotes
     .filter((q) => q.quoteType === 'EQUITY' || q.quoteType === 'ETF')
     .filter((q) => q.symbol?.endsWith('.NS') || q.symbol?.endsWith('.BO'))
     .map((q) => ({
