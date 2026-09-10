@@ -43,10 +43,24 @@ export function SearchBar() {
   })
 
   function navigate(ticker: string) {
-    router.push(`/stock/${encodeURIComponent(ticker)}`)
+    if (!ticker.trim()) return
+    const t = ticker.trim().toUpperCase()
+    const resolved = t.startsWith('^') || t.endsWith('.NS') || t.endsWith('.BO') ? t : `${t}.NS`
+    router.push(`/stock/${encodeURIComponent(resolved)}`)
     setOpen(false)
     setQuery('')
   }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' && query.trim().length >= 1) {
+      navigate(query)
+    }
+  }
+
+  const trimmed = query.trim().toUpperCase()
+  const directLabel = trimmed && !trimmed.endsWith('.NS') && !trimmed.endsWith('.BO') && !trimmed.startsWith('^')
+    ? `${trimmed}.NS`
+    : trimmed
 
   return (
     <>
@@ -68,7 +82,8 @@ export function SearchBar() {
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search NSE/BSE stocks..."
+                onKeyDown={handleKeyDown}
+                placeholder="Type ticker + ↵  (e.g. RELIANCE, TCS, INFY)"
                 className="flex-1 bg-transparent outline-none text-sm"
                 style={{ color: 'var(--text)' }}
               />
@@ -79,7 +94,7 @@ export function SearchBar() {
                 <button
                   key={r.ticker}
                   onClick={() => navigate(r.ticker)}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-opacity-50 transition-colors text-left"
+                  className="w-full flex items-center justify-between px-4 py-3 transition-colors text-left"
                   style={{ borderBottom: '1px solid var(--border)' }}
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--surface-2)')}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
@@ -91,8 +106,21 @@ export function SearchBar() {
                   <span className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--surface-2)', color: 'var(--text-muted)' }}>{r.type}</span>
                 </button>
               ))}
-              {debounced.length >= 2 && !results.length && !isFetching && (
-                <p className="px-4 py-6 text-sm text-center" style={{ color: 'var(--text-muted)' }}>No results for "{debounced}"</p>
+
+              {/* Direct-navigation row — always shown when something is typed */}
+              {trimmed.length >= 1 && (
+                <button
+                  onClick={() => navigate(query)}
+                  className="w-full flex items-center justify-between px-4 py-3 transition-colors text-left"
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--surface-2)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                >
+                  <div>
+                    <span className="text-sm font-mono font-semibold">{directLabel}</span>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Go directly to this ticker</p>
+                  </div>
+                  <span className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--surface-2)', color: 'var(--text-muted)' }}>↵</span>
+                </button>
               )}
             </div>
           </div>
