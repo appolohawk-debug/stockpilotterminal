@@ -15,7 +15,6 @@
     "lightweight-charts": "^5.0.0",
     "zustand": "^5.0.0",
     "@tanstack/react-query": "^5.62.0",
-    "yahoo-finance2": "^2.13.0",
     "@libsql/client": "^0.14.0",
     "date-fns": "^4.1.0",
     "clsx": "^2.1.0",
