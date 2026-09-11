@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getQuote } from '@/lib/yahoo'
 
+export const runtime = 'edge'
+
 export async function GET(_: Request, { params }: { params: Promise<{ ticker: string }> }) {
   const { ticker } = await params
   try {

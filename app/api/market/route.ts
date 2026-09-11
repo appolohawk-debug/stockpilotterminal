@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getQuotes } from '@/lib/yahoo'
 
+export const runtime = 'edge'
+
 const INDICES = [
   { name: 'NIFTY 50', ticker: '^NSEI' },
   { name: 'SENSEX', ticker: '^BSESN' },

@@ -1,6 +1,8 @@
 import { getQuote, getChart } from '@/lib/yahoo'
 import { StockDetailClient } from './StockDetailClient'
 
+export const runtime = 'edge'
+
 interface Props {
   params: Promise<{ ticker: string }>
 }

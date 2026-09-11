@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { searchTickers } from '@/lib/yahoo'
 
+export const runtime = 'edge'
+
 export async function GET(req: Request) {
   const url = new URL(req.url)
   const q = url.searchParams.get('q')?.trim()

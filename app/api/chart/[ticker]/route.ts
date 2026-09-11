@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getChart } from '@/lib/yahoo'
 
+export const runtime = 'edge'
+
 export async function GET(req: Request, { params }: { params: Promise<{ ticker: string }> }) {
   const { ticker } = await params
   const url = new URL(req.url)

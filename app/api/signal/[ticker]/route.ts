@@ -3,6 +3,8 @@ import { getHistoricalCloses, getFundamentals } from '@/lib/yahoo'
 import { computeTechnicalScore, computeFundamentalScore } from '@/lib/scoring'
 import type { SignalResponse } from '@/lib/types'
 
+export const runtime = 'edge'
+
 export async function GET(_: Request, { params }: { params: Promise<{ ticker: string }> }) {
   const { ticker } = await params
   const decodedTicker = decodeURIComponent(ticker)
