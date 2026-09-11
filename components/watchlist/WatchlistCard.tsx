@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import type { WatchlistItem } from '@/lib/types'
+import { SignalPills } from './SignalPills'
 
 interface Props {
   items: WatchlistItem[]
@@ -31,8 +32,9 @@ export function WatchlistCard({ items, onRemove }: Props) {
                   {item.name && <span className="text-xs truncate hidden sm:block" style={{ color: 'var(--text-muted)' }}>{item.name}</span>}
                 </div>
               </Link>
-              <div className="flex items-center gap-4">
-                <div className="text-right">
+              <div className="flex items-center gap-3">
+                <SignalPills ticker={item.ticker} />
+                <div className="text-right min-w-[80px]">
                   <p className="font-mono text-sm font-semibold">
                     {item.price != null ? `₹${item.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}` : '—'}
                   </p>
